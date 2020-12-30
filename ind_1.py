@@ -12,7 +12,19 @@ from dataclasses import dataclass, field
 import sys
 import logging
 from typing import List
+from datetime import date
 import xml.etree.ElementTree as ET
+
+
+class IllegalDateError(Exception):
+    def __init__(self, birthday, message="Illegal date"):
+        self.birthday = birthday
+        self.message = message
+
+        super(IllegalDateError, self).__init__(message)
+
+    def __str__(self):
+        return f"{self.birthday} -> {self.message}"
 
 
 class UnknownCommandError(Exception):
@@ -38,6 +50,12 @@ class People:
     people: List[Person] = field(default_factory=lambda: [])
 
     def add(self, name: str, phone: int, birthday: list) -> None:
+        today = date.today()
+
+        if birthday[2] < 0 or birthday[2] > today.year or birthday[0] < 0 or \
+                birthday[0] > 31 or birthday[1] < 0 or birthday[1] > 12:
+            raise IllegalDateError(birthday)
+
         self.people.append(
             Person(
                 name=name,
@@ -88,16 +106,16 @@ class People:
 
         return '\n'.join(table)
 
-    def select(self, period) -> List[Person]:
-        month = period
-
+    def select(self, period):
+        parts = command.split(' ', maxsplit=2)
+        period = int(parts[1])
+        result = []
         count = 0
         for person in self.people:
-            birthday = person.birthday
-            if birthday:
-                if birthday == month:
-                    count += 1
-        return f'{count}, {person.name}'
+            if period in person.birthday:
+                count += 1
+                result.append(person)
+        return result
 
     def load(self, filename) -> None:
         with open(filename, 'r', encoding="utf8") as fin:
@@ -115,7 +133,10 @@ class People:
                 elif element.tag == 'phone':
                     phone = element.text
                 elif element.tag == 'birthday':
-                    birthday = int(element.text)
+                    birthday = element.text
+                    birthday = birthday.replace("[", "")
+                    birthday = birthday.replace("]", "")
+                    birthday = list(map(int, birthday.split(',')))
 
                 if name is not None and phone is not None \
                         and birthday is not None:
