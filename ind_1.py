@@ -112,7 +112,7 @@ class People:
         result = []
         count = 0
         for person in self.people:
-            if period in person.birthday:
+            if period == person.birthday[1]:
                 count += 1
                 result.append(person)
         return result
@@ -185,6 +185,7 @@ if __name__ == '__main__':
 
             if command == 'exit':
                 break
+
             elif command == 'add':
                 name = input("Фамилия и инициалы: ")
                 phone = input("Телефон: ")
@@ -194,7 +195,7 @@ if __name__ == '__main__':
                 logging.info(
                     f"Добавлен человек: {name}, "
                     f"Номер телефона {phone}, "
-                    f"Месяц рождения {birthday} "
+                    f"Дата рождения {birthday} "
                 )
 
             elif command == 'list':
