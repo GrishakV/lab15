@@ -42,14 +42,14 @@ class UnknownCommandError(Exception):
 class Person:
     name: str
     phone: int
-    birthday: list
+    birthday: List[int]
 
 
 @dataclass
 class People:
     people: List[Person] = field(default_factory=lambda: [])
 
-    def add(self, name: str, phone: int, birthday: list) -> None:
+    def add(self, name: str, phone: int, birthday: List[int]) -> None:
         today = date.today()
 
         if birthday[2] < 0 or birthday[2] > today.year or birthday[0] < 0 or \
